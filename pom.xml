@@ -4,7 +4,7 @@
 
     <groupId>com.mmccaskill</groupId>
     <artifactId>keystore-utils</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
     <packaging>jar</packaging>
 
     <name>Key Store Utils</name>
