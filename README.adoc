@@ -1,0 +1,35 @@
+= KeyStoreUtils
+
+== Purpose
+
+To offer a simple way to get add key store and trust stores to the JVM
+
+== Implementation
+
+Currently, the only implementation is extracting values from CredHub via CfEnv.
+
+This reads in the passed in environment variables, decodes the stores, and writes them to the configured temporary paths.
+
+It's advised in your CF app to specify the SSL properties using `${vcap.services.<CREDHUB_NAME>.credentials`.
+
+=== Configuration
+
+To use, simply add three environment variables:
+
+* `CREDHUB_NAME`
+** Name of the CredHub service bound to the application
+* `CREDHUB_KEYSTORE`
+** Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS key store
+* `CREDHUB_TRUSTSTORE`
+** Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS trust store
+
+The library also expects additional fields in the CredHub service:
+
+* `<CREDHUB_KEYSTORE>-path`
+** The path on the CF container where to save the key store
+* `<CREDHUB_KEYSTORE>-password`
+** The key store password
+* `<CREDHUB_TRUSTSTORE>-path`
+** The path on the CF container where to save the trust store
+* `<CREDHUB_TRUSTSTORE>-password`
+** The trust store password
