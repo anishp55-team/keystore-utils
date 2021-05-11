@@ -1,0 +1,2 @@
+io.pivotal.cfenv.spring.boot.CfEnvProcessor=\
+sh.buildit.credhub.CredHubKafkaEnvProcessor
