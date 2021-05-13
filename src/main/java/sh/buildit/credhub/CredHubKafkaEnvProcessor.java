@@ -17,39 +17,32 @@ import java.util.Map;
 import java.util.Optional;
 
 public class CredHubKafkaEnvProcessor implements CfEnvProcessor {
-    private static final String CREDHUB_ENV_VAR = "CREDHUB_NAME";
+    static final String CREDHUB_ENV_VAR = "CREDHUB_NAME";
+    static final String CREDHUB_KEYSTORE_ENV_VAR = "CREDHUB_KEYSTORE";
+    static final String CREDHUB_TRUSTSTORE_ENV_VAR = "CREDHUB_TRUSTSTORE";
 
-    private static final String SSL_PROTOCOL_PROPERTY = "spring.kafka.ssl.protocol";
-    private static final String KAFKA_PROPERTIES_PROPERTY = "spring.kafka.properties";
-    private static final String ENDPOINT_ALGORITHM_PROPERTY = "ssl.endpoint.identification.algorithm";
-    private static final String SECURITY_PROTOCOL_PROPERTY = "security.protocol";
-    private static final String TRUST_STORE_LOCATION_PROPERTY = "spring.kafka.ssl.trust-store-location";
-    private static final String TRUST_STORE_PASSWORD_PROPERTY = "spring.kafka.ssl.trust-store-password";
-    private static final String TRUST_STORE_TYPE_PROPERTY = "spring.kafka.ssl.trust-store-type";
-    private static final String KEY_STORE_LOCATION_PROPERTY = "spring.kafka.ssl.key-store-location";
-    private static final String KEY_STORE_PASSWORD_PROPERTY = "spring.kafka.ssl.key-store-password";
-    private static final String KEY_STORE_TYPE_PROPERTY = "spring.kafka.ssl.key-store-type";
+    static final String SSL_PROTOCOL_PROPERTY = "spring.kafka.ssl.protocol";
+    static final String KAFKA_PROPERTIES_PROPERTY = "spring.kafka.properties";
+    static final String ENDPOINT_ALGORITHM_PROPERTY = "ssl.endpoint.identification.algorithm";
+    static final String SECURITY_PROTOCOL_PROPERTY = "security.protocol";
+    static final String TRUST_STORE_LOCATION_PROPERTY = "spring.kafka.ssl.trust-store-location";
+    static final String TRUST_STORE_PASSWORD_PROPERTY = "spring.kafka.ssl.trust-store-password";
+    static final String TRUST_STORE_TYPE_PROPERTY = "spring.kafka.ssl.trust-store-type";
+    static final String KEY_STORE_LOCATION_PROPERTY = "spring.kafka.ssl.key-store-location";
+    static final String KEY_STORE_PASSWORD_PROPERTY = "spring.kafka.ssl.key-store-password";
+    static final String KEY_STORE_TYPE_PROPERTY = "spring.kafka.ssl.key-store-type";
 
-    private static final String TRUST_STORE_LOCATION = "trust-store-location";
-    private static final String TRUST_STORE_PASSWORD = "trust-store-password";
-    private static final String TRUST_STORE_TYPE = "trust-store-type";
-    private static final String KEY_STORE_LOCATION = "key-store-location";
-    private static final String KEY_STORE_PASSWORD = "key-store-password";
-    private static final String KEY_STORE_TYPE = "key-store-type";
+    static final String TRUST_STORE_LOCATION = "trust-store-location";
+    static final String TRUST_STORE_PASSWORD = "trust-store-password";
+    static final String TRUST_STORE_TYPE = "trust-store-type";
+    static final String KEY_STORE_LOCATION = "key-store-location";
+    static final String KEY_STORE_PASSWORD = "key-store-password";
+    static final String KEY_STORE_TYPE = "key-store-type";
 
     @Override
     public boolean accept(CfService service) {
         final String credhub = readEnv(CREDHUB_ENV_VAR);
         return service.existsByTagIgnoreCase("credhub") && service.getName().equalsIgnoreCase(credhub);
-    }
-
-    private static String readEnv(String var) {
-        final String value = Optional.of(System.getenv(var))
-                .orElseThrow(() -> new IllegalArgumentException("Environment variable " + var + " is required"));
-        if (value.trim().isEmpty()) {
-            throw new IllegalArgumentException("Environment variable " + var + " requires a value");
-        }
-        return value;
     }
 
     @Override
@@ -58,14 +51,23 @@ public class CredHubKafkaEnvProcessor implements CfEnvProcessor {
         kafkaProperties.put(ENDPOINT_ALGORITHM_PROPERTY, null);
         kafkaProperties.put(SECURITY_PROTOCOL_PROPERTY, "ssl");
         properties.put(SSL_PROTOCOL_PROPERTY, "ssl");
-
         properties.put(KAFKA_PROPERTIES_PROPERTY, kafkaProperties);
-        properties.put(TRUST_STORE_LOCATION_PROPERTY, extractKeyStore(cfCredentials, TRUST_STORE_LOCATION));
-        properties.put(TRUST_STORE_PASSWORD_PROPERTY, cfCredentials.getMap().get(TRUST_STORE_PASSWORD).toString());
-        properties.put(TRUST_STORE_TYPE_PROPERTY, cfCredentials.getMap().get(TRUST_STORE_TYPE).toString());
-        properties.put(KEY_STORE_LOCATION_PROPERTY, extractKeyStore(cfCredentials, KEY_STORE_LOCATION));
-        properties.put(KEY_STORE_PASSWORD_PROPERTY, cfCredentials.getMap().get(KEY_STORE_PASSWORD).toString());
-        properties.put(KEY_STORE_TYPE_PROPERTY, cfCredentials.getMap().get(KEY_STORE_TYPE).toString());
+
+        final String trustStoreLocation = getStoreLocationKey(CREDHUB_TRUSTSTORE_ENV_VAR, TRUST_STORE_LOCATION);
+        final String trustStorePassword = getStorePasswordKey(CREDHUB_TRUSTSTORE_ENV_VAR, TRUST_STORE_PASSWORD);
+        final String trustStoreType = getStoreTypeKey(CREDHUB_TRUSTSTORE_ENV_VAR, TRUST_STORE_TYPE);
+
+        properties.put(TRUST_STORE_LOCATION_PROPERTY, extractKeyStore(cfCredentials, trustStoreLocation));
+        properties.put(TRUST_STORE_PASSWORD_PROPERTY, cfCredentials.getMap().get(trustStorePassword).toString());
+        properties.put(TRUST_STORE_TYPE_PROPERTY, cfCredentials.getMap().get(trustStoreType).toString());
+
+        final String keyStoreLocation = getStoreLocationKey(CREDHUB_KEYSTORE_ENV_VAR, KEY_STORE_LOCATION);
+        final String keyStorePassword = getStorePasswordKey(CREDHUB_KEYSTORE_ENV_VAR, KEY_STORE_PASSWORD);
+        final String keyStoreType = getStoreTypeKey(CREDHUB_KEYSTORE_ENV_VAR, KEY_STORE_TYPE);
+
+        properties.put(KEY_STORE_LOCATION_PROPERTY, extractKeyStore(cfCredentials, keyStoreLocation));
+        properties.put(KEY_STORE_PASSWORD_PROPERTY, cfCredentials.getMap().get(keyStorePassword).toString());
+        properties.put(KEY_STORE_TYPE_PROPERTY, cfCredentials.getMap().get(keyStoreType).toString());
     }
 
     @Override
@@ -76,9 +78,45 @@ public class CredHubKafkaEnvProcessor implements CfEnvProcessor {
                 .build();
     }
 
+    private String getStoreLocationKey(String envVar, String defaultKey) {
+        return getKey(envVar, defaultKey, "location");
+    }
+
+    private String getStorePasswordKey(String envVar, String defaultKey) {
+        return getKey(envVar, defaultKey, "password");
+    }
+
+    private String getStoreTypeKey(String envVar, String defaultKey) {
+        return getKey(envVar, defaultKey, "type");
+    }
+
+    private String getKey(String envVar, String defaultKey, String suffix) {
+        return readOptionalEnv(envVar)
+            .map(value -> value + "-" + suffix)
+            .orElseGet(() -> defaultKey);
+    }
+
+    private static String readEnv(String var) {
+        final String value = Optional.of(System.getenv(var))
+            .orElseThrow(() -> new IllegalArgumentException("Environment variable " + var + " is required"));
+        if (value.trim().isEmpty()) {
+            throw new IllegalArgumentException("Environment variable " + var + " requires a value");
+        }
+        return value;
+    }
+
+    private static Optional<String> readOptionalEnv(String var) {
+        return Optional.ofNullable(System.getenv(var));
+    }
+
     private static String extractKeyStore(CfCredentials cfCredentials, String key) {
         final Map<String, Object> content = cfCredentials.getMap();
-        final byte[] decoded = Base64.getDecoder().decode(content.get(key).toString());
+        final byte[] decoded;
+        try {
+            decoded = Base64.getDecoder().decode(content.get(key).toString());
+        } catch (Exception e) {
+            throw new RuntimeException("Failure grabbing value " + key + " from CredHub");
+        }
         try {
             final Path tempFile = Files.createTempFile(null, ".jks");
             try (final InputStream inputStream = new ByteArrayInputStream(decoded)) {
