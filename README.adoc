@@ -10,17 +10,15 @@ Currently, the only implementation is extracting values from CredHub via CfEnv.
 
 This reads in the passed in environment variables, decodes the stores, and writes them to the configured temporary paths.
 
-It's advised in your CF app to specify the SSL properties using `${vcap.services.<CREDHUB_NAME>.credentials`.
-
 To take advantage of this library, please make sure it compiled locally `mvn install` and available, or via your maven repository.
-After verifiying avaliabilty of the JAR, please update your pom.xml to include the following
+After verifying availability of the JAR, please update your pom.xml to include the following
 
-```		
+```
 
 <dependency>
   <groupId>sh.buildit.credhub</groupId>
   <artifactId>keystore-utils</artifactId>
-  <version>0.0.2</version>
+  <version>0.0.4</version>
 </dependency>
 
 ```
@@ -31,13 +29,13 @@ After verifiying avaliabilty of the JAR, please update your pom.xml to include t
 To use, simply add three environment variables:
 
 * `CREDHUB_NAME`
-** Name of the CredHub service bound to the application
+** (Required) Name of the CredHub service bound to the application
 * `CREDHUB_KEYSTORE`
-** Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS key store
+** (Optional) Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS key store. By default, it assumes `key-store`
 * `CREDHUB_TRUSTSTORE`
-** Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS trust store
+** (Optional) Name of the individual credential in `CREDHUB_NAME` that contains a Base64 encoded JKS trust store. By default, it assumes `trust-store`
 
-an example manifest 
+an example manifest
 
 ```
 ---
@@ -54,15 +52,16 @@ applications:
     JBP_CONFIG_OPEN_JDK_JRE: '{ jre: { version: 11.+ } }'
     JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}'
     SPRING_PROFILES_ACTIVE: cloud
-```    
+```
 
 The library also expects additional fields in the CredHub service:
 
-* `<CREDHUB_KEYSTORE>-path`
-** The path on the CF container where to save the key store
 * `<CREDHUB_KEYSTORE>-password`
 ** The key store password
-* `<CREDHUB_TRUSTSTORE>-path`
-** The path on the CF container where to save the trust store
+* `<CREDHUB_KEYSTORE>-type`
+** The key store type
 * `<CREDHUB_TRUSTSTORE>-password`
 ** The trust store password
+* `<CREDHUB_TRUSTSTORE>-type`
+** The trust store type
+
