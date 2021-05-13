@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junitpioneer.jupiter.SetEnvironmentVariable;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -30,10 +31,11 @@ public class CredHubKafkaEnvProcessorTest {
     @Test
     @SetEnvironmentVariable(key = CredHubKafkaEnvProcessor.CREDHUB_ENV_VAR, value = "my-credhub")
     public void acceptsService() {
-        final Map<String, Object> serviceData = Map.of(
-            "tags", List.of("credhub"),
-            "name", "my-credhub"
-        );
+        final Map<String, Object> serviceData = new HashMap<>();
+        final List<String> tags = new ArrayList<>();
+        tags.add("credhub");
+        serviceData.put("tags", tags);
+        serviceData.put("name", "my-credhub");
         final CfService service = new CfService(serviceData);
         final boolean accepts = processor.accept(service);
         assertTrue(accepts);
@@ -42,10 +44,11 @@ public class CredHubKafkaEnvProcessorTest {
     @Test
     @SetEnvironmentVariable(key = CredHubKafkaEnvProcessor.CREDHUB_ENV_VAR, value = "not-my-credhub")
     public void notAcceptsService() {
-        final Map<String, Object> serviceData = Map.of(
-            "tags", List.of("credhub"),
-            "name", "my-credhub"
-        );
+        final Map<String, Object> serviceData = new HashMap<>();
+        final List<String> tags = new ArrayList<>();
+        tags.add("credhub");
+        serviceData.put("tags", tags);
+        serviceData.put("name", "my-credhub");
         final CfService service = new CfService(serviceData);
         final boolean accepts = processor.accept(service);
         assertFalse(accepts);
@@ -62,14 +65,13 @@ public class CredHubKafkaEnvProcessorTest {
         final String trustStorePassword = "trustStorePassword";
         final String trustStoreType = "trustStoreType";
 
-        final Map<String, Object> credentialsData = Map.of(
-            CredHubKafkaEnvProcessor.KEY_STORE_LOCATION, keyStoreLocation,
-            CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD, keyStorePassword,
-            CredHubKafkaEnvProcessor.KEY_STORE_TYPE, keyStoreType,
-            CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION, trustStoreLocation,
-            CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD, trustStorePassword,
-            CredHubKafkaEnvProcessor.TRUST_STORE_TYPE, trustStoreType
-        );
+        final Map<String, Object> credentialsData = new HashMap<>();
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION, keyStoreLocation);
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD, keyStorePassword);
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_TYPE, keyStoreType);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION, trustStoreLocation);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD, trustStorePassword);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE, trustStoreType);
         final CfCredentials credentials = new CfCredentials(credentialsData);
         final Map<String, Object> properties = new HashMap<>();
 
@@ -77,13 +79,13 @@ public class CredHubKafkaEnvProcessorTest {
         verifyCommonProperties(properties);
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(keyStorePassword, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD_PROPERTY));
         assertEquals(keyStoreType, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_TYPE_PROPERTY));
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(trustStorePassword, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD_PROPERTY));
         assertEquals(trustStoreType, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE_PROPERTY));
@@ -101,14 +103,13 @@ public class CredHubKafkaEnvProcessorTest {
         final String trustStorePassword = "trustStorePassword";
         final String trustStoreType = "trustStoreType";
 
-        final Map<String, Object> credentialsData = Map.of(
-            "my-key-store-location", keyStoreLocation,
-            "my-key-store-password", keyStorePassword,
-            "my-key-store-type", keyStoreType,
-            CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION, trustStoreLocation,
-            CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD, trustStorePassword,
-            CredHubKafkaEnvProcessor.TRUST_STORE_TYPE, trustStoreType
-        );
+        final Map<String, Object> credentialsData = new HashMap<>();
+        credentialsData.put("my-key-store-location", keyStoreLocation);
+        credentialsData.put("my-key-store-password", keyStorePassword);
+        credentialsData.put("my-key-store-type", keyStoreType);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION, trustStoreLocation);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD, trustStorePassword);
+        credentialsData.put(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE, trustStoreType);
         final CfCredentials credentials = new CfCredentials(credentialsData);
         final Map<String, Object> properties = new HashMap<>();
 
@@ -116,13 +117,13 @@ public class CredHubKafkaEnvProcessorTest {
         verifyCommonProperties(properties);
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(keyStorePassword, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD_PROPERTY));
         assertEquals(keyStoreType, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_TYPE_PROPERTY));
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(trustStorePassword, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD_PROPERTY));
         assertEquals(trustStoreType, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE_PROPERTY));
@@ -140,14 +141,13 @@ public class CredHubKafkaEnvProcessorTest {
         final String trustStorePassword = "trustStorePassword";
         final String trustStoreType = "trustStoreType";
 
-        final Map<String, Object> credentialsData = Map.of(
-            CredHubKafkaEnvProcessor.KEY_STORE_LOCATION, keyStoreLocation,
-            CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD, keyStorePassword,
-            CredHubKafkaEnvProcessor.KEY_STORE_TYPE, keyStoreType,
-            "my-trust-store-location", trustStoreLocation,
-            "my-trust-store-password", trustStorePassword,
-            "my-trust-store-type", trustStoreType
-        );
+        final Map<String, Object> credentialsData = new HashMap<>();
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION, keyStoreLocation);
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD, keyStorePassword);
+        credentialsData.put(CredHubKafkaEnvProcessor.KEY_STORE_TYPE, keyStoreType);
+        credentialsData.put("my-trust-store-location", trustStoreLocation);
+        credentialsData.put("my-trust-store-password", trustStorePassword);
+        credentialsData.put("my-trust-store-type", trustStoreType);
         final CfCredentials credentials = new CfCredentials(credentialsData);
         final Map<String, Object> properties = new HashMap<>();
 
@@ -155,13 +155,13 @@ public class CredHubKafkaEnvProcessorTest {
         verifyCommonProperties(properties);
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(keyStorePassword, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD_PROPERTY));
         assertEquals(keyStoreType, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_TYPE_PROPERTY));
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(trustStorePassword, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD_PROPERTY));
         assertEquals(trustStoreType, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE_PROPERTY));
@@ -180,14 +180,13 @@ public class CredHubKafkaEnvProcessorTest {
         final String trustStorePassword = "trustStorePassword";
         final String trustStoreType = "trustStoreType";
 
-        final Map<String, Object> credentialsData = Map.of(
-            "my-key-store-location", keyStoreLocation,
-            "my-key-store-password", keyStorePassword,
-            "my-key-store-type", keyStoreType,
-            "my-trust-store-location", trustStoreLocation,
-            "my-trust-store-password", trustStorePassword,
-            "my-trust-store-type", trustStoreType
-        );
+        final Map<String, Object> credentialsData = new HashMap<>();
+        credentialsData.put("my-key-store-location", keyStoreLocation);
+        credentialsData.put("my-key-store-password", keyStorePassword);
+        credentialsData.put("my-key-store-type", keyStoreType);
+        credentialsData.put("my-trust-store-location", trustStoreLocation);
+        credentialsData.put("my-trust-store-password", trustStorePassword);
+        credentialsData.put("my-trust-store-type", trustStoreType);
         final CfCredentials credentials = new CfCredentials(credentialsData);
         final Map<String, Object> properties = new HashMap<>();
 
@@ -195,13 +194,13 @@ public class CredHubKafkaEnvProcessorTest {
         verifyCommonProperties(properties);
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.KEY_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(keyStorePassword, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_PASSWORD_PROPERTY));
         assertEquals(keyStoreType, properties.get(CredHubKafkaEnvProcessor.KEY_STORE_TYPE_PROPERTY));
 
         assertTrue(properties.containsKey(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY));
-        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isBlank());
+        assertFalse(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().isEmpty());
         assertTrue(properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_LOCATION_PROPERTY).toString().startsWith("file://"));
         assertEquals(trustStorePassword, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_PASSWORD_PROPERTY));
         assertEquals(trustStoreType, properties.get(CredHubKafkaEnvProcessor.TRUST_STORE_TYPE_PROPERTY));
